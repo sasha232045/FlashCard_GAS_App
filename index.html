@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>究極の単語学習アプリ</title>
+    <style>
+        /* リセットCSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* ヘッダー */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        /* メインコンテナ */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* カード学習モード */
+        .study-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .card-text {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .card-memo {
+            font-size: 1rem;
+            color: #666;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .card-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .flip-btn {
+            background: #28a745;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .flip-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        /* ステータスボタン */
+        .status-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .status-btn {
+            padding: 0.3rem 0.8rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-未着手 { background: #6c757d; color: white; }
+        .status-学習中 { background: #007bff; color: white; }
+        .status-苦手・要復習 { background: #dc3545; color: white; }
+        .status-定着 { background: #ffc107; color: black; }
+        .status-習得済み { background: #28a745; color: white; }
+
+        /* 評価ボタン */
+        .rating-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .rating-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .rating-btn:nth-child(1) { background: #dc3545; color: white; }
+        .rating-btn:nth-child(2) { background: #fd7e14; color: white; }
+        .rating-btn:nth-child(3) { background: #ffc107; color: black; }
+        .rating-btn:nth-child(4) { background: #28a745; color: white; }
+        .rating-btn:nth-child(5) { background: #20c997; color: white; }
+
+        /* データ管理画面 */
+        .data-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+        }
+
+        .table-controls {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .form-control {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* 設定画面 */
+        .settings-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+
+        .settings-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .setting-label {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: #ccc;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            left: 27px;
+        }
+
+        /* 読み上げコントロール */
+        .audio-controls {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .audio-settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .speed-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .speed-slider {
+            width: 100%;
+        }
+
+        /* 発音練習 */
+        .speech-practice {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .mic-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: #dc3545;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 1rem;
+        }
+
+        .mic-button:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .mic-button.recording {
+            background: #28a745;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-buttons {
+                justify-content: center;
+            }
+
+            .card-text {
+                font-size: 1.5rem;
+            }
+
+            .card-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .status-buttons,
+            .rating-buttons {
+                justify-content: center;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            .audio-settings {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ユーティリティクラス */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* エラーメッセージ */
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">📚 究極の単語学習アプリ</div>
+            <nav class="nav-buttons">
+                <button class="btn btn-primary" onclick="showStudyMode()">学習モード</button>
+                <button class="btn btn-secondary" onclick="showDataManager()">データ管理</button>
+                <button class="btn btn-secondary" onclick="showSettings()">設定</button>
+                <button class="btn btn-secondary" onclick="showReviewMode()">今日の復習</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- メインコンテナ -->
+    <div class="container">
+        <!-- 学習モード -->
+        <div id="studyMode" class="study-mode">
+            <!-- 読み上げコントロール -->
+            <div class="audio-controls">
+                <h3>読み上げ設定</h3>
+                <div class="audio-settings">
+                    <div class="speed-control">
+                        <label>英語読み上げ速度: <span id="englishSpeedValue">1.0</span></label>
+                        <input type="range" class="speed-slider" id="englishSpeed" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="speed-control">
+                        <label>日本語読み上げ速度: <span id="japaneseSpeedValue">1.0</span></label>
+                        <input type="range" class="speed-slider" id="japaneseSpeed" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <div>
+                        <label><input type="checkbox" id="autoPlay"> 自動再生</label>
+                    </div>
+                    <div>
+                        <label><input type="checkbox" id="loopMode"> ループ再生</label>
+                    </div>
+                    <div>
+                        <label>再生枚数: 
+                            <select id="playCount">
+                                <option value="1">1枚</option>
+                                <option value="10">10枚</option>
+                                <option value="20">20枚</option>
+                                <option value="all">全て</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="playCustomAudio()">カスタム読み上げ開始</button>
+                    <button class="btn btn-secondary" onclick="stopAudio()">停止</button>
+                </div>
+            </div>
+
+            <!-- 学習カード -->
+            <div class="study-card">
+                <div class="card-content">
+                    <div id="cardText" class="card-text">学習を開始してください</div>
+                    <div id="cardMemos"></div>
+                    <div class="status-buttons">
+                        <button class="status-btn" data-skill="listening" onclick="toggleStatus('listening')">L: 未着手</button>
+                        <button class="status-btn" data-skill="reading" onclick="toggleStatus('reading')">R: 未着手</button>
+                        <button class="status-btn" data-skill="speaking" onclick="toggleStatus('speaking')">S: 未着手</button>
+                        <button class="status-btn" data-skill="writing" onclick="toggleStatus('writing')">W: 未着手</button>
+                    </div>
+                </div>
+                
+                <div class="card-controls">
+                    <button class="flip-btn" onclick="flipCard()">カードをめくる</button>
+                    <button class="btn btn-secondary" onclick="speakText()">🔊 読み上げ</button>
+                    <button class="btn btn-secondary" onclick="prevCard()">← 前</button>
+                    <button class="btn btn-secondary" onclick="nextCard()">次 →</button>
+                </div>
+
+                <!-- 評価ボタン（裏面表示時のみ） -->
+                <div id="ratingButtons" class="rating-buttons hidden">
+                    <button class="rating-btn" onclick="rateCard(1)">難しい</button>
+                    <button class="rating-btn" onclick="rateCard(2)">やや難</button>
+                    <button class="rating-btn" onclick="rateCard(3)">普通</button>
+                    <button class="rating-btn" onclick="rateCard(4)">できた</button>
+                    <button class="rating-btn" onclick="rateCard(5)">完璧</button>
+                </div>
+            </div>
+
+            <!-- 発音練習 -->
+            <div class="speech-practice">
+                <h3>発音練習</h3>
+                <p>マイクボタンを押して発音してください</p>
+                <button class="mic-button" onclick="startSpeechRecognition()">🎤</button>
+                <div id="speechResult"></div>
+                <div id="speechFeedback"></div>
+            </div>
+        </div>
+
+        <!-- データ管理画面 -->
+        <div id="dataManager" class="data-manager hidden">
+            <div class="data-table">
+                <div class="table-controls">
+                    <h2>単語データ管理</h2>
+                    <div class="filter-controls">
+                        <input type="text" class="form-control" id="searchInput" placeholder="検索...">
+                        <select class="form-control" id="sectionFilter">
+                            <option value="">全セクション</option>
+                        </select>
+                        <select class="form-control" id="statusFilter">
+                            <option value="">全ステータス</option>
+                            <option value="未着手">未着手</option>
+                            <option value="学習中">学習中</option>
+                            <option value="苦手・要復習">苦手・要復習</option>
+                            <option value="定着">定着</option>
+                            <option value="習得済み">習得済み</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showAddWordForm()">新規追加</button>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="loadWords()">更新</button>
+                        <button class="btn btn-secondary" onclick="showSpreadsheetInfo()">スプレッドシート情報</button>
+                        <button class="btn btn-secondary" onclick="forceAddTestData()">テストデータ強制追加</button>
+                        <button class="btn btn-secondary" onclick="showDebugInfo()">デバッグ情報</button>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>表面</th>
+                                <th>裏面</th>
+                                <th>セクション</th>
+                                <th>タグ</th>
+                                <th>L</th>
+                                <th>R</th>
+                                <th>S</th>
+                                <th>W</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wordsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 新規追加・編集フォーム -->
+            <div id="wordForm" class="settings-panel hidden">
+                <h3 id="formTitle">新規単語追加</h3>
+                <form onsubmit="saveWord(event)">
+                    <input type="hidden" id="wordId">
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">表面（英語等）*</label>
+                        <input type="text" class="form-control" id="frontText" required>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">裏面（日本語等）*</label>
+                        <input type="text" class="form-control" id="backText" required>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">例文・備考</label>
+                        <textarea class="form-control" id="exampleText" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">セクション</label>
+                        <input type="text" class="form-control" id="sectionText">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">タグ（カンマ区切り）</label>
+                        <input type="text" class="form-control" id="tagsText">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">読み上げパターン</label>
+                        <input type="text" class="form-control" id="readPattern" value="E1,J1">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">読み上げ間隔（秒）</label>
+                        <input type="number" class="form-control" id="readInterval" value="1" min="0.5" step="0.5">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">メモ1（カタカナ読みなど）</label>
+                        <input type="text" class="form-control" id="memo1">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">メモ2（発音記号など）</label>
+                        <input type="text" class="form-control" id="memo2">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">メモ3（発音のコツなど）</label>
+                        <input type="text" class="form-control" id="memo3">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">メモ4</label>
+                        <input type="text" class="form-control" id="memo4">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label class="setting-label">メモ5</label>
+                        <input type="text" class="form-control" id="memo5">
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary">保存</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideWordForm()">キャンセル</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 設定画面 -->
+        <div id="settings" class="settings-panel hidden">
+            <h2>アプリ設定</h2>
+            
+            <!-- メモ表示設定 -->
+            <div class="settings-section">
+                <h3 class="settings-title">メモ表示設定</h3>
+                <div class="setting-item">
+                    <span class="setting-label">表面（英語）表示時にメモ1を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo1Front')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">裏面（日本語）表示時にメモ1を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo1Back')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">表面（英語）表示時にメモ2を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo2Front')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">裏面（日本語）表示時にメモ2を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo2Back')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">表面（英語）表示時にメモ3を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo3Front')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">裏面（日本語）表示時にメモ3を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo3Back')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">表面（英語）表示時にメモ4を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo4Front')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">裏面（日本語）表示時にメモ4を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo4Back')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">表面（英語）表示時にメモ5を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo5Front')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">裏面（日本語）表示時にメモ5を表示</span>
+                    <div class="toggle-switch" onclick="toggleSetting('showMemo5Back')"></div>
+                </div>
+            </div>
+
+            <!-- 一般設定 -->
+            <div class="settings-section">
+                <h3 class="settings-title">一般設定</h3>
+                <div class="setting-item">
+                    <span class="setting-label">カードめくり時に自動読み上げ</span>
+                    <div class="toggle-switch" onclick="toggleSetting('autoReadOnFlip')"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">学習開始時にステータス自動更新</span>
+                    <div class="toggle-switch active" onclick="toggleSetting('autoUpdateStatus')"></div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-primary" onclick="saveSettings()">設定を保存</button>
+                <button class="btn btn-secondary" onclick="resetSettings()">設定をリセット</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let allWords = [];
+        let currentWords = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let isPlaying = false;
+        let speechRecognition = null;
+        let audioContext = null;
+
+        // 設定オブジェクト
+        let settings = {
+            showMemo1Front: false,
+            showMemo1Back: true,
+            showMemo2Front: true,
+            showMemo2Back: false,
+            showMemo3Front: true,
+            showMemo3Back: false,
+            showMemo4Front: false,
+            showMemo4Back: false,
+            showMemo5Front: false,
+            showMemo5Back: false,
+            autoReadOnFlip: true,
+            autoUpdateStatus: true
+        };
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('アプリ初期化開始');
+            initializeApp();
+            loadSettings();
+            setupEventListeners();
+        });
+
+        function initializeApp() {
+            console.log('アプリケーション初期化中...');
+            
+            // 初期化時は空の配列で開始
+            allWords = [];
+            currentWords = [];
+            currentIndex = 0;
+            
+            // データ読み込みを実行
+            loadWords();
+            showStudyMode();
+            
+            // 音声認識の初期化
+            if ('webkitSpeechRecognition' in window) {
+                speechRecognition = new webkitSpeechRecognition();
+                speechRecognition.continuous = false;
+                speechRecognition.interimResults = false;
+                speechRecognition.lang = 'en-US';
+                
+                speechRecognition.onresult = function(event) {
+                    const result = event.results[0][0].transcript;
+                    console.log('音声認識結果: ' + result);
+                    processSpeechResult(result);
+                };
+                
+                speechRecognition.onerror = function(event) {
+                    console.error('音声認識エラー: ' + event.error);
+                    showMessage('音声認識エラー: ' + event.error, 'error');
+                };
+                
+                console.log('音声認識機能を初期化しました');
+            } else {
+                console.warn('音声認識がサポートされていません');
+            }
+            
+            console.log('アプリケーション初期化完了');
+        }
+
+        function setupEventListeners() {
+            // 読み上げ速度スライダー
+            document.getElementById('englishSpeed').addEventListener('input', function() {
+                document.getElementById('englishSpeedValue').textContent = this.value;
+            });
+            
+            document.getElementById('japaneseSpeed').addEventListener('input', function() {
+                document.getElementById('japaneseSpeedValue').textContent = this.value;
+            });
+
+            // 検索とフィルター
+            document.getElementById('searchInput').addEventListener('input', filterWords);
+            document.getElementById('sectionFilter').addEventListener('change', filterWords);
+            document.getElementById('statusFilter').addEventListener('change', filterWords);
+
+            // キーボードショートカット
+            document.addEventListener('keydown', function(event) {
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+                
+                switch(event.code) {
+                    case 'Space':
+                        event.preventDefault();
+                        flipCard();
+                        break;
+                    case 'ArrowLeft':
+                        event.preventDefault();
+                        prevCard();
+                        break;
+                    case 'ArrowRight':
+                        event.preventDefault();
+                        nextCard();
+                        break;
+                    case 'KeyS':
+                        event.preventDefault();
+                        speakText();
+                        break;
+                }
+            });
+        }
+
+        // 画面表示切り替え
+        function showStudyMode() {
+            console.log('学習モード表示');
+            hideAllScreens();
+            document.getElementById('studyMode').classList.remove('hidden');
+            if (currentWords.length === 0) {
+                loadWords();
+            }
+        }
+
+        function showDataManager() {
+            console.log('データ管理画面表示');
+            hideAllScreens();
+            document.getElementById('dataManager').classList.remove('hidden');
+            loadWords();
+        }
+
+        function showSettings() {
+            console.log('設定画面表示');
+            hideAllScreens();
+            document.getElementById('settings').classList.remove('hidden');
+            updateSettingsUI();
+        }
+
+        function showReviewMode() {
+            console.log('復習モード表示');
+            google.script.run
+                .withSuccessHandler(function(reviewWords) {
+                    console.log(`今日の復習対象: ${reviewWords.length}件`);
+                    currentWords = reviewWords;
+                    currentIndex = 0;
+                    if (reviewWords.length > 0) {
+                        showStudyMode();
+                        displayCurrentCard();
+                        showMessage(`今日の復習対象: ${reviewWords.length}件`, 'success');
+                    } else {
+                        showMessage('今日復習する単語はありません！', 'success');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('復習データ取得エラー: ' + error);
+                    showMessage('復習データの取得に失敗しました', 'error');
+                })
+                .getTodayReviewWords();
+        }
+
+        function hideAllScreens() {
+            document.getElementById('studyMode').classList.add('hidden');
+            document.getElementById('dataManager').classList.add('hidden');
+            document.getElementById('settings').classList.add('hidden');
+        }
+
+        // データ読み込み
+        function loadWords() {
+            console.log('=== loadWords関数開始 ===');
+            showLoading(true);
+            
+            // エラーハンドリングを強化
+            try {
+                console.log('Google Apps Scriptを呼び出し中...');
+                
+                google.script.run
+                    .withSuccessHandler(function(response) {
+                        console.log('=== サーバーレスポンス受信 ===');
+                        console.log('レスポンスタイプ:', typeof response);
+                        console.log('レスポンス内容:', response);
+                        
+                        let words = response;
+                        
+                        // より詳細なnullチェック
+                        if (response === null) {
+                            console.error('サーバーレスポンスがnullです');
+                            console.log('これはサーバー側でエラーが発生している可能性があります');
+                            showMessage('サーバーからデータを取得できませんでした。テストデータを手動で追加してください。', 'error');
+                            words = [];
+                        } else if (response === undefined) {
+                            console.error('サーバーレスポンスがundefinedです');
+                            words = [];
+                        } else if (!Array.isArray(response)) {
+                            console.error('サーバーレスポンスが配列ではありません:', typeof response);
+                            console.log('レスポンス詳細:', JSON.stringify(response));
+                            words = [];
+                        }
+                        
+                        console.log(`処理対象の単語数: ${words.length}`);
+                        
+                        // 各単語をコンソールに詳細表示
+                        if (words.length > 0) {
+                            console.log('=== 受信した単語データ ===');
+                            words.forEach((word, index) => {
+                                console.log(`${index + 1}. ID:${word.id} ${word.front || '(空)'} → ${word.back || '(空)'}`);
+                                console.log(`   セクション: ${word.section || '(なし)'}, タグ: ${word.tags || '(なし)'}`);
+                                console.log(`   読み上げ: ${word.readPattern || 'E1,J1'}, 間隔: ${word.readInterval || 1.0}秒`);
+                                console.log(`   メモ: 1="${word.memo1 || ''}", 2="${word.memo2 || ''}", 3="${word.memo3 || ''}"`);
+                                console.log(`   ステータス - L:${word.statusListening || '未着手'}, R:${word.statusReading || '未着手'}, S:${word.statusSpeaking || '未着手'}, W:${word.statusWriting || '未着手'}`);
+                                console.log('   ---');
+                            });
+                            console.log('========================');
+                        }
+                        
+                        allWords = words;
+                        currentWords = [...words];
+                        currentIndex = 0;
+                        
+                        if (words.length === 0) {
+                            console.log('単語データが0件です');
+                            showMessage('単語データがありません。「テストデータ強制追加」ボタンを押してください。', 'error');
+                        } else {
+                            console.log(`学習可能な単語: ${words.length}件`);
+                            showMessage(`${words.length}件の単語データを読み込みました`, 'success');
+                        }
+                        
+                        displayCurrentCard();
+                        updateWordsTable();
+                        updateFilterOptions();
+                        showLoading(false);
+                        
+                        console.log('=== loadWords処理完了 ===');
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('=== サーバーエラー発生 ===');
+                        console.error('エラータイプ:', typeof error);
+                        console.error('エラー内容:', error);
+                        console.error('エラー詳細:', JSON.stringify(error));
+                        
+                        showMessage('サーバーエラー: ' + error, 'error');
+                        showLoading(false);
+                        
+                        // エラー時は空の配列で初期化
+                        allWords = [];
+                        currentWords = [];
+                        currentIndex = 0;
+                        displayCurrentCard();
+                        updateWordsTable();
+                        
+                        console.log('=== エラー処理完了 ===');
+                    })
+                    .getAllWords();
+                    
+                console.log('Google Apps Script呼び出し完了（非同期）');
+                
+            } catch (exception) {
+                console.error('=== JavaScript例外発生 ===');
+                console.error('例外タイプ:', typeof exception);
+                console.error('例外内容:', exception);
+                console.error('例外スタック:', exception.stack);
+                
+                showMessage('クライアントエラー: ' + exception.message, 'error');
+                showLoading(false);
+                
+                console.log('=== 例外処理完了 ===');
+            }
+        }
+
+        // カード表示
+        function displayCurrentCard() {
+            if (currentWords.length === 0) {
+                document.getElementById('cardText').textContent = '学習する単語がありません';
+                document.getElementById('cardMemos').innerHTML = '<div class="card-memo">データ管理画面から単語を追加してください</div>';
+                updateStatusButtons();
+                return;
+            }
+
+            const word = currentWords[currentIndex];
+            console.log(`カード表示: ${word.front} (${currentIndex + 1}/${currentWords.length})`);
+            
+            // 初回学習時のステータス更新
+            if (settings.autoUpdateStatus && 
+                (word.statusListening === '未着手' || word.statusReading === '未着手' || 
+                 word.statusSpeaking === '未着手' || word.statusWriting === '未着手')) {
+                updateWordStatusToLearning(word.id);
+            }
+            
+            if (isFlipped) {
+                document.getElementById('cardText').textContent = word.back || '（裏面データなし）';
+                displayMemos(word, false); // 裏面
+                document.getElementById('ratingButtons').classList.remove('hidden');
+            } else {
+                document.getElementById('cardText').textContent = word.front || '（表面データなし）';
+                displayMemos(word, true); // 表面
+                document.getElementById('ratingButtons').classList.add('hidden');
+            }
+            
+            updateStatusButtons(word);
+            
+            if (settings.autoReadOnFlip) {
+                setTimeout(() => speakText(), 500);
+            }
+        }
+
+        function displayMemos(word, isFront) {
+            const memosContainer = document.getElementById('cardMemos');
+            memosContainer.innerHTML = '';
+            
+            for (let i = 1; i <= 5; i++) {
+                const memoText = word[`memo${i}`];
+                const shouldShow = isFront ? 
+                    settings[`showMemo${i}Front`] : 
+                    settings[`showMemo${i}Back`];
+                
+                if (memoText && shouldShow) {
+                    const memoDiv = document.createElement('div');
+                    memoDiv.className = 'card-memo';
+                    memoDiv.textContent = memoText;
+                    memosContainer.appendChild(memoDiv);
+                }
+            }
+        }
+
+        function updateStatusButtons(word = null) {
+            if (!word && currentWords.length > 0) {
+                word = currentWords[currentIndex];
+            }
+            
+            if (!word) {
+                // 単語がない場合のデフォルト表示
+                const skills = ['listening', 'reading', 'speaking', 'writing'];
+                const labels = ['L', 'R', 'S', 'W'];
+                
+                skills.forEach((skill, index) => {
+                    const button = document.querySelector(`[data-skill="${skill}"]`);
+                    if (button) {
+                        button.textContent = `${labels[index]}: 未着手`;
+                        button.className = `status-btn status-未着手`;
+                    }
+                });
+                return;
+            }
+            
+            const skills = ['listening', 'reading', 'speaking', 'writing'];
+            const labels = ['L', 'R', 'S', 'W'];
+            
+            skills.forEach((skill, index) => {
+                const button = document.querySelector(`[data-skill="${skill}"]`);
+                if (button) {
+                    const status = word[`status${skill.charAt(0).toUpperCase() + skill.slice(1)}`] || '未着手';
+                    button.textContent = `${labels[index]}: ${status}`;
+                    button.className = `status-btn status-${status}`;
+                }
+            });
+        }
+
+        // カード操作
+        function flipCard() {
+            console.log('カードフリップ');
+            isFlipped = !isFlipped;
+            displayCurrentCard();
+        }
+
+        function nextCard() {
+            if (currentWords.length === 0) return;
+            
+            console.log('次のカードへ');
+            currentIndex = (currentIndex + 1) % currentWords.length;
+            isFlipped = false;
+            displayCurrentCard();
+        }
+
+        function prevCard() {
+            if (currentWords.length === 0) return;
+            
+            console.log('前のカードへ');
+            currentIndex = currentIndex > 0 ? currentIndex - 1 : currentWords.length - 1;
+            isFlipped = false;
+            displayCurrentCard();
+        }
+
+        // 読み上げ機能
+        function speakText() {
+            if (currentWords.length === 0) return;
+            
+            const word = currentWords[currentIndex];
+            const text = isFlipped ? word.back : word.front;
+            const lang = isFlipped ? 'ja-JP' : 'en-US';
+            const speed = isFlipped ? 
+                document.getElementById('japaneseSpeed').value : 
+                document.getElementById('englishSpeed').value;
+            
+            console.log(`読み上げ: ${text} (言語: ${lang}, 速度: ${speed})`);
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang;
+                utterance.rate = parseFloat(speed);
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playCustomAudio() {
+            if (currentWords.length === 0) return;
+            
+            console.log('カスタム読み上げ開始');
+            isPlaying = true;
+            
+            const word = currentWords[currentIndex];
+            const pattern = word.readPattern || 'E1,J1';
+            const interval = (word.readInterval || 1) * 1000;
+            
+            playPattern(word, pattern.split(','), interval, 0);
+        }
+
+        function playPattern(word, patterns, interval, index) {
+            if (!isPlaying || index >= patterns.length) {
+                isPlaying = false;
+                return;
+            }
+            
+            const pattern = patterns[index].trim();
+            const isEnglish = pattern.startsWith('E');
+            const repeatCount = parseInt(pattern.substr(1)) || 1;
+            
+            for (let i = 0; i < repeatCount; i++) {
+                setTimeout(() => {
+                    if (!isPlaying) return;
+                    
+                    const text = isEnglish ? word.front : word.back;
+                    const lang = isEnglish ? 'en-US' : 'ja-JP';
+                    const speed = isEnglish ? 
+                        document.getElementById('englishSpeed').value : 
+                        document.getElementById('japaneseSpeed').value;
+                    
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = lang;
+                    utterance.rate = parseFloat(speed);
+                    window.speechSynthesis.speak(utterance);
+                }, i * interval);
+            }
+            
+            setTimeout(() => {
+                playPattern(word, patterns, interval, index + 1);
+            }, repeatCount * interval);
+        }
+
+        function stopAudio() {
+            console.log('読み上げ停止');
+            isPlaying = false;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // ステータス管理
+        function toggleStatus(skill) {
+            if (currentWords.length === 0) return;
+            
+            const word = currentWords[currentIndex];
+            const currentStatus = word[`status${skill.charAt(0).toUpperCase() + skill.slice(1)}`];
+            
+            const statusCycle = ['苦手・要復習', '定着', '習得済み'];
+            let nextIndex = statusCycle.indexOf(currentStatus) + 1;
+            if (nextIndex >= statusCycle.length) nextIndex = 0;
+            
+            const newStatus = statusCycle[nextIndex];
+            console.log(`ステータス変更: ${skill} ${currentStatus} -> ${newStatus}`);
+            
+            word[`status${skill.charAt(0).toUpperCase() + skill.slice(1)}`] = newStatus;
+            updateStatusButtons(word);
+            
+            // サーバーに送信
+            google.script.run
+                .withSuccessHandler(function(success) {
+                    if (success) {
+                        console.log('ステータス更新成功');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('ステータス更新エラー: ' + error);
+                })
+                .updateWord(word);
+        }
+
+        function updateWordStatusToLearning(wordId) {
+            google.script.run
+                .withSuccessHandler(function(success) {
+                    if (success) {
+                        console.log('初回学習ステータス更新完了');
+                        // ローカルデータも更新
+                        const word = currentWords.find(w => w.id == wordId);
+                        if (word) {
+                            if (word.statusListening === '未着手') word.statusListening = '学習中';
+                            if (word.statusReading === '未着手') word.statusReading = '学習中';
+                            if (word.statusSpeaking === '未着手') word.statusSpeaking = '学習中';
+                            if (word.statusWriting === '未着手') word.statusWriting = '学習中';
+                            updateStatusButtons(word);
+                        }
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('初回学習ステータス更新エラー: ' + error);
+                })
+                .updateStatusToLearning(wordId);
+        }
+
+        // SRS評価
+        function rateCard(quality) {
+            if (currentWords.length === 0) return;
+            
+            const word = currentWords[currentIndex];
+            console.log(`SRS評価: ID=${word.id}, 評価=${quality}`);
+            
+            google.script.run
+                .withSuccessHandler(function(success) {
+                    if (success) {
+                        console.log('SRS評価送信完了');
+                        showMessage(`評価を記録しました（${quality}/5）`, 'success');
+                        nextCard();
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('SRS評価エラー: ' + error);
+                    showMessage('評価の記録に失敗しました', 'error');
+                })
+                .calculateNextReview(word.id, quality);
+        }
+
+        // 発音練習
+        function startSpeechRecognition() {
+            if (!speechRecognition) {
+                showMessage('音声認識がサポートされていません', 'error');
+                return;
+            }
+            
+            if (currentWords.length === 0) return;
+            
+            console.log('音声認識開始');
+            const micButton = document.querySelector('.mic-button');
+            micButton.classList.add('recording');
+            micButton.textContent = '🔴';
+            
+            document.getElementById('speechResult').textContent = '聞き取り中...';
+            document.getElementById('speechFeedback').textContent = '';
+            
+            speechRecognition.start();
+            
+            setTimeout(() => {
+                micButton.classList.remove('recording');
+                micButton.textContent = '🎤';
+            }, 5000);
+        }
+
+        function processSpeechResult(result) {
+            const word = currentWords[currentIndex];
+            const target = word.front.toLowerCase().replace(/[^a-zA-Z\s]/g, '');
+            const spoken = result.toLowerCase().replace(/[^a-zA-Z\s]/g, '');
+            
+            document.getElementById('speechResult').textContent = `認識結果: "${result}"`;
+            
+            const similarity = calculateSimilarity(target, spoken);
+            let feedback = '';
+            let color = '';
+            
+            if (similarity > 0.8) {
+                feedback = '素晴らしい発音です！';
+                color = '#28a745';
+            } else if (similarity > 0.6) {
+                feedback = '良い発音です。もう少し練習してみましょう。';
+                color = '#ffc107';
+            } else {
+                feedback = '発音を見直してみましょう。正解: "' + word.front + '"';
+                color = '#dc3545';
+            }
+            
+            const feedbackElement = document.getElementById('speechFeedback');
+            feedbackElement.textContent = feedback;
+            feedbackElement.style.color = color;
+            
+            console.log(`発音評価: 類似度=${similarity}, フィードバック=${feedback}`);
+        }
+
+        function calculateSimilarity(str1, str2) {
+            const longer = str1.length > str2.length ? str1 : str2;
+            const shorter = str1.length > str2.length ? str2 : str1;
+            
+            if (longer.length === 0) return 1;
+            
+            const distance = levenshteinDistance(longer, shorter);
+            return (longer.length - distance) / longer.length;
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+            
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            
+            return matrix[str2.length][str1.length];
+        }
+
+        // データ管理
+        function updateWordsTable() {
+            const tbody = document.getElementById('wordsTableBody');
+            
+            // nullチェックを追加
+            if (!tbody) {
+                console.error('wordsTableBody要素が見つかりません');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            // currentWordsのnullチェック
+            if (!currentWords || !Array.isArray(currentWords)) {
+                console.log('currentWordsが無効です:', currentWords);
+                return;
+            }
+            
+            console.log(`テーブル更新: ${currentWords.length}件の単語を表示`);
+            
+            currentWords.forEach((word, index) => {
+                if (!word) {
+                    console.warn(`単語${index}がnullです`);
+                    return;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${word.id || '(ID不明)'}</td>
+                    <td>${word.front || '(表面なし)'}</td>
+                    <td>${word.back || '(裏面なし)'}</td>
+                    <td>${word.section || '(セクションなし)'}</td>
+                    <td>${word.tags || '(タグなし)'}</td>
+                    <td><span class="status-${word.statusListening || '未着手'}">${word.statusListening || '未着手'}</span></td>
+                    <td><span class="status-${word.statusReading || '未着手'}">${word.statusReading || '未着手'}</span></td>
+                    <td><span class="status-${word.statusSpeaking || '未着手'}">${word.statusSpeaking || '未着手'}</span></td>
+                    <td><span class="status-${word.statusWriting || '未着手'}">${word.statusWriting || '未着手'}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editWord(${word.id || 0})" style="margin-right: 0.5rem;">編集</button>
+                        <button class="btn btn-secondary" onclick="deleteWordConfirm(${word.id || 0})" style="background: #dc3545; color: white;">削除</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log('テーブル更新完了');
+        }
+
+        function updateFilterOptions() {
+            console.log('フィルターオプション更新開始');
+            
+            // セクションフィルター更新
+            const sectionFilter = document.getElementById('sectionFilter');
+            if (!sectionFilter) {
+                console.error('sectionFilter要素が見つかりません');
+                return;
+            }
+            
+            // allWordsのnullチェック
+            if (!allWords || !Array.isArray(allWords)) {
+                console.log('allWordsが無効です:', allWords);
+                sectionFilter.innerHTML = '<option value="">全セクション</option>';
+                return;
+            }
+            
+            const sections = [...new Set(allWords.map(w => w && w.section).filter(s => s))];
+            console.log('セクション一覧:', sections);
+            
+            sectionFilter.innerHTML = '<option value="">全セクション</option>';
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionFilter.appendChild(option);
+            });
+            
+            console.log('フィルターオプション更新完了');
+        }
+
+        function filterWords() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const section = document.getElementById('sectionFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            
+            currentWords = allWords.filter(word => {
+                const matchesSearch = !search || 
+                    word.front.toLowerCase().includes(search) ||
+                    word.back.toLowerCase().includes(search) ||
+                    word.tags.toLowerCase().includes(search);
+                
+                const matchesSection = !section || word.section === section;
+                
+                const matchesStatus = !status || 
+                    word.statusListening === status ||
+                    word.statusReading === status ||
+                    word.statusSpeaking === status ||
+                    word.statusWriting === status;
+                
+                return matchesSearch && matchesSection && matchesStatus;
+            });
+            
+            console.log(`フィルター結果: ${currentWords.length}件`);
+            updateWordsTable();
+            currentIndex = 0;
+            displayCurrentCard();
+        }
+
+        // 単語の追加・編集
+        function showAddWordForm() {
+            document.getElementById('formTitle').textContent = '新規単語追加';
+            document.getElementById('wordForm').classList.remove('hidden');
+            document.getElementById('wordId').value = '';
+            clearWordForm();
+        }
+
+        function editWord(wordId) {
+            const word = allWords.find(w => w.id == wordId);
+            if (!word) return;
+            
+            document.getElementById('formTitle').textContent = '単語編集';
+            document.getElementById('wordForm').classList.remove('hidden');
+            
+            // フォームに値を設定
+            document.getElementById('wordId').value = word.id;
+            document.getElementById('frontText').value = word.front;
+            document.getElementById('backText').value = word.back;
+            document.getElementById('exampleText').value = word.example;
+            document.getElementById('sectionText').value = word.section;
+            document.getElementById('tagsText').value = word.tags;
+            document.getElementById('readPattern').value = word.readPattern;
+            document.getElementById('readInterval').value = word.readInterval;
+            document.getElementById('memo1').value = word.memo1;
+            document.getElementById('memo2').value = word.memo2;
+            document.getElementById('memo3').value = word.memo3;
+            document.getElementById('memo4').value = word.memo4;
+            document.getElementById('memo5').value = word.memo5;
+        }
+
+        function hideWordForm() {
+            document.getElementById('wordForm').classList.add('hidden');
+            clearWordForm();
+        }
+
+        function clearWordForm() {
+            const inputs = document.querySelectorAll('#wordForm input, #wordForm textarea');
+            inputs.forEach(input => {
+                if (input.id !== 'readPattern' && input.id !== 'readInterval') {
+                    input.value = '';
+                }
+            });
+            document.getElementById('readPattern').value = 'E1,J1';
+            document.getElementById('readInterval').value = '1';
+        }
+
+        function saveWord(event) {
+            event.preventDefault();
+            
+            const wordData = {
+                id: document.getElementById('wordId').value,
+                front: document.getElementById('frontText').value,
+                back: document.getElementById('backText').value,
+                example: document.getElementById('exampleText').value,
+                section: document.getElementById('sectionText').value,
+                tags: document.getElementById('tagsText').value,
+                readPattern: document.getElementById('readPattern').value,
+                readInterval: document.getElementById('readInterval').value,
+                memo1: document.getElementById('memo1').value,
+                memo2: document.getElementById('memo2').value,
+                memo3: document.getElementById('memo3').value,
+                memo4: document.getElementById('memo4').value,
+                memo5: document.getElementById('memo5').value
+            };
+            
+            console.log('単語保存:', wordData);
+            
+            const isEdit = !!wordData.id;
+            const apiCall = isEdit ? 'updateWord' : 'addWord';
+            
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    console.log('単語保存成功:', result);
+                    showMessage(isEdit ? '単語を更新しました' : '新しい単語を追加しました', 'success');
+                    hideWordForm();
+                    loadWords();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('単語保存エラー:', error);
+                    showMessage('保存に失敗しました', 'error');
+                })
+                [apiCall](wordData);
+        }
+
+        function deleteWordConfirm(wordId) {
+            const word = allWords.find(w => w.id == wordId);
+            if (!word) return;
+            
+            if (confirm(`「${word.front}」を削除しますか？`)) {
+                console.log('単語削除:', wordId);
+                
+                google.script.run
+                    .withSuccessHandler(function(success) {
+                        if (success) {
+                            console.log('単語削除成功');
+                            showMessage('単語を削除しました', 'success');
+                            loadWords();
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error('単語削除エラー:', error);
+                        showMessage('削除に失敗しました', 'error');
+                    })
+                    .deleteWord(wordId);
+            }
+        }
+
+        // 設定管理
+        function toggleSetting(settingName) {
+            settings[settingName] = !settings[settingName];
+            console.log(`設定変更: ${settingName} = ${settings[settingName]}`);
+            updateSettingsUI();
+            displayCurrentCard(); // メモ表示を更新
+        }
+
+        function updateSettingsUI() {
+            Object.keys(settings).forEach(key => {
+                const toggle = document.querySelector(`[onclick="toggleSetting('${key}')"]`);
+                if (toggle) {
+                    if (settings[key]) {
+                        toggle.classList.add('active');
+                    } else {
+                        toggle.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        function saveSettings() {
+            localStorage.setItem('wordAppSettings', JSON.stringify(settings));
+            console.log('設定保存完了');
+            showMessage('設定を保存しました', 'success');
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('wordAppSettings');
+            if (saved) {
+                settings = { ...settings, ...JSON.parse(saved) };
+                console.log('設定読み込み完了');
+            }
+            updateSettingsUI();
+        }
+
+        function resetSettings() {
+            if (confirm('設定をリセットしますか？')) {
+                localStorage.removeItem('wordAppSettings');
+                settings = {
+                    showMemo1Front: false,
+                    showMemo1Back: true,
+                    showMemo2Front: true,
+                    showMemo2Back: false,
+                    showMemo3Front: true,
+                    showMemo3Back: false,
+                    showMemo4Front: false,
+                    showMemo4Back: false,
+                    showMemo5Front: false,
+                    showMemo5Back: false,
+                    autoReadOnFlip: true,
+                    autoUpdateStatus: true
+                };
+                updateSettingsUI();
+                console.log('設定リセット完了');
+                showMessage('設定をリセットしました', 'success');
+            }
+        }
+
+        // ユーティリティ
+        function showMessage(message, type = 'info') {
+            // 既存のメッセージを削除
+            const existingMessages = document.querySelectorAll('.error-message, .success-message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.textContent = message;
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            // 3秒後に自動削除
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        function showLoading(show) {
+            // ローディング表示の実装
+            const loadingElement = document.getElementById('loading');
+            if (show) {
+                if (!loadingElement) {
+                    const loading = document.createElement('div');
+                    loading.id = 'loading';
+                    loading.innerHTML = '<div class="loading"></div> データを読み込んでいます...';
+                    loading.style.textAlign = 'center';
+                    loading.style.padding = '2rem';
+                    document.querySelector('.container').insertBefore(loading, document.querySelector('.container').firstChild);
+                }
+            } else {
+                if (loadingElement) {
+                    loadingElement.remove();
+                }
+            }
+        }
+
+        // デバッグ用ヘルパー
+        function debugInfo() {
+            console.log('=== デバッグ情報 ===');
+            console.log('全単語数:', allWords.length);
+            console.log('表示中単語数:', currentWords.length);
+            console.log('現在のインデックス:', currentIndex);
+            console.log('現在の設定:', settings);
+            console.log('カードの状態 - めくり:', isFlipped);
+            console.log('==================');
+        }
+
+        // グローバルに公開（デバッグ用）
+        window.debugInfo = debugInfo;
+
+        // スプレッドシート情報表示
+        function showSpreadsheetInfo() {
+            console.log('スプレッドシート情報取得開始');
+            google.script.run
+                .withSuccessHandler(function(info) {
+                    console.log('スプレッドシート詳細情報:', info);
+                    let message = `=== スプレッドシート詳細情報 ===\n`;
+                    message += `スプレッドシート名: ${info.spreadsheetName}\n`;
+                    message += `スプレッドシートID: ${info.spreadsheetId}\n`;
+                    message += `スプレッドシートURL: ${info.spreadsheetUrl}\n`;
+                    message += `シート総数: ${info.sheetCount}\n`;
+                    message += `ターゲットシート存在: ${info.targetSheetExists ? 'あり' : 'なし'}\n`;
+                    message += `ターゲットシート名: ${info.targetSheetName || 'なし'}\n`;
+                    message += `最終行: ${info.lastRow}\n`;
+                    message += `最終列: ${info.lastColumn}\n`;
+                    message += `\n※詳細なログはブラウザのコンソールで確認できます`;
+                    alert(message);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('スプレッドシート情報取得エラー:', error);
+                    alert('スプレッドシート情報の取得に失敗しました: ' + error);
+                })
+                .debugSpreadsheetInfo();
+        }
+
+        // テストデータ強制追加
+        function forceAddTestData() {
+            console.log('=== テストデータ強制追加開始 ===');
+            
+            if (!confirm('テストデータを強制的に追加しますか？\n（既存データがある場合でも5つのテスト単語を追加します）')) {
+                return;
+            }
+            
+            showLoading(true);
+            showMessage('テストデータを追加中...', 'info');
+            
+            // 直接テストデータを追加
+            const testWords = [
+                {
+                    front: 'Hello',
+                    back: 'こんにちは',
+                    example: 'Hello, how are you? - 元気ですか？',
+                    section: '基本会話',
+                    tags: '挨拶,日常会話',
+                    readPattern: 'E2,J1,E1',
+                    readInterval: 1.5,
+                    memo1: 'ヘロー',
+                    memo2: '/həˈloʊ/',
+                    memo3: 'ハの音を意識して'
+                },
+                {
+                    front: 'Thank you',
+                    back: 'ありがとう',
+                    example: 'Thank you very much. - どうもありがとうございます。',
+                    section: '基本会話',
+                    tags: '挨拶,感謝',
+                    readPattern: 'E1,J1',
+                    readInterval: 1.0,
+                    memo1: 'サンキュー',
+                    memo2: '/θæŋk juː/',
+                    memo3: 'thの音は舌を軽く噛んで'
+                },
+                {
+                    front: 'Good morning',
+                    back: 'おはよう',
+                    example: 'Good morning! Have a nice day. - おはよう！良い一日を。',
+                    section: '基本会話',
+                    tags: '挨拶,朝',
+                    readPattern: 'E2,J1',
+                    readInterval: 1.2,
+                    memo1: 'グッドモーニング',
+                    memo2: '/ɡʊd ˈmɔːrnɪŋ/',
+                    memo3: 'モーニングの最後は軽く'
+                },
+                {
+                    front: 'Beautiful',
+                    back: '美しい',
+                    example: 'What a beautiful day! - なんて美しい日でしょう！',
+                    section: '形容詞',
+                    tags: '形容詞,感情',
+                    readPattern: 'E3,J1',
+                    readInterval: 1.0,
+                    memo1: 'ビューティフル',
+                    memo2: '/ˈbjuːtɪfəl/',
+                    memo3: 'ビューの部分を強調'
+                },
+                {
+                    front: 'Important',
+                    back: '重要な',
+                    example: 'This is very important. - これはとても重要です。',
+                    section: '形容詞',
+                    tags: '形容詞,ビジネス',
+                    readPattern: 'E2,J1,E1',
+                    readInterval: 1.3,
+                    memo1: 'インポータント',
+                    memo2: '/ɪmˈpɔːrtənt/',
+                    memo3: 'ポーの部分にアクセント'
+                }
+            ];
+            
+            console.log(`${testWords.length}件のテストデータを順次追加開始`);
+            
+            // 順次追加
+            let addedCount = 0;
+            function addNextWord() {
+                if (addedCount >= testWords.length) {
+                    console.log('全てのテストデータ追加完了');
+                    showMessage('テストデータの追加が完了しました。データを再読み込みします...', 'success');
+                    setTimeout(() => {
+                        loadWords();
+                    }, 1000);
+                    return;
+                }
+                
+                const word = testWords[addedCount];
+                console.log(`テストデータ${addedCount + 1}を追加中: ${word.front}`);
+                
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        console.log(`テストデータ${addedCount + 1}追加成功: ID=${result}`);
+                        addedCount++;
+                        setTimeout(addNextWord, 200); // 少し間隔を空けて次を追加
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error(`テストデータ${addedCount + 1}追加エラー:`, error);
+                        showMessage(`テストデータ追加エラー: ${error}`, 'error');
+                        showLoading(false);
+                    })
+                    .addWord(word);
+            }
+            
+            addNextWord();
+        }
+
+        // デバッグ情報表示
+        function showDebugInfo() {
+            console.log('=== デバッグ情報取得開始 ===');
+            
+            let debugInfo = '=== クライアント側デバッグ情報 ===\n';
+            debugInfo += `現在時刻: ${new Date()}\n`;
+            debugInfo += `全単語数: ${allWords ? allWords.length : 'null/undefined'}\n`;
+            debugInfo += `表示中単語数: ${currentWords ? currentWords.length : 'null/undefined'}\n`;
+            debugInfo += `現在のインデックス: ${currentIndex}\n`;
+            debugInfo += `カードの状態: ${isFlipped ? '裏面' : '表面'}\n`;
+            debugInfo += `音声再生中: ${isPlaying}\n`;
+            debugInfo += `音声認識対応: ${speechRecognition ? 'あり' : 'なし'}\n`;
+            debugInfo += `Speech Synthesis対応: ${'speechSynthesis' in window ? 'あり' : 'なし'}\n`;
+            debugInfo += `ブラウザ: ${navigator.userAgent}\n`;
+            debugInfo += '\n';
+            
+            if (allWords && allWords.length > 0) {
+                debugInfo += '=== 現在の単語リスト ===\n';
+                allWords.slice(0, 5).forEach((word, index) => {
+                    debugInfo += `${index + 1}. ${word.front} → ${word.back}\n`;
+                });
+                if (allWords.length > 5) {
+                    debugInfo += `... その他${allWords.length - 5}件\n`;
+                }
+            }
+            
+            console.log(debugInfo);
+            
+            // サーバー側の詳細情報も取得
+            console.log('サーバー側の詳細情報を取得中...');
+            google.script.run
+                .withSuccessHandler(function(serverInfo) {
+                    console.log('=== サーバー側デバッグ情報 ===', serverInfo);
+                    
+                    let fullDebugInfo = debugInfo + '\n=== サーバー側デバッグ情報 ===\n';
+                    fullDebugInfo += `スプレッドシート名: ${serverInfo.spreadsheetName}\n`;
+                    fullDebugInfo += `スプレッドシートID: ${serverInfo.spreadsheetId}\n`;
+                    fullDebugInfo += `スプレッドシートURL: ${serverInfo.spreadsheetUrl}\n`;
+                    fullDebugInfo += `シート総数: ${serverInfo.sheetCount}\n`;
+                    fullDebugInfo += `ターゲットシート存在: ${serverInfo.targetSheetExists ? 'あり' : 'なし'}\n`;
+                    fullDebugInfo += `ターゲットシート名: ${serverInfo.targetSheetName || 'なし'}\n`;
+                    fullDebugInfo += `最終行: ${serverInfo.lastRow}\n`;
+                    fullDebugInfo += `最終列: ${serverInfo.lastColumn}\n`;
+                    
+                    alert(fullDebugInfo);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('サーバー側デバッグ情報取得エラー:', error);
+                    alert(debugInfo + '\n=== サーバー側デバッグ情報 ===\nエラー: ' + error);
+                })
+                .debugSpreadsheetInfo();
+        }
+    </script>
+</body>
+</html>
