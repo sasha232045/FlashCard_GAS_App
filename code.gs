@@ -360,9 +360,32 @@ function getAllWords() {
       const headerRange = sheet.getRange(1, 1, 1, Math.min(lastColumn, 21));
       const headers = headerRange.getValues()[0];
       console.log('ヘッダー行の内容:');
+      
+      let hasValidHeaders = false;
       headers.forEach((header, index) => {
         console.log(`  列${index + 1}: "${header}"`);
+        if (header && header.toString().trim()) {
+          hasValidHeaders = true;
+        }
       });
+      
+      // ヘッダー行が空の場合、再作成
+      if (!hasValidHeaders) {
+        console.log('⚠️ ヘッダー行が空のため、再作成します');
+        const newHeaders = [
+          'ID', '表面_テキスト', '裏面_テキスト', '備考_例文', 'セクション', 'タグ',
+          '読み上げパターン', '読み上げ間隔', '次回レビュー日', '間隔', 'EF',
+          'メモ1', 'メモ2', 'メモ3', 'メモ4', 'メモ5',
+          'ステータス_Listening', 'ステータス_Reading', 'ステータス_Speaking', 'ステータス_Writing',
+          '登録日'
+        ];
+        
+        sheet.getRange(1, 1, 1, newHeaders.length).setValues([newHeaders]);
+        sheet.getRange(1, 1, 1, newHeaders.length).setBackground('#4CAF50')
+          .setFontColor('white').setFontWeight('bold');
+        
+        console.log('ヘッダー行の再作成完了');
+      }
     }
     
     // データ行があるかチェック
@@ -445,31 +468,51 @@ function getAllWords() {
       const today = new Date();
       const todayStr = today.toLocaleDateString('ja-JP');
       
+      // 日付データの安全な変換
+      let registeredDate = todayStr;
+      if (row[20]) {
+        if (row[20] instanceof Date) {
+          registeredDate = row[20].toLocaleDateString('ja-JP');
+        } else {
+          registeredDate = String(row[20]);
+        }
+      }
+      
       const word = {
         id: row[0] || (Date.now() + index),
-        front: row[1] || '',
-        back: row[2] || '',
-        example: row[3] || '',
-        section: row[4] || 'デフォルト',
-        tags: row[5] || '',
-        readPattern: row[6] || 'E1,J1',
-        readInterval: row[7] || 1.0,
-        nextReviewDate: row[8] || '',
-        interval: row[9] || 1,
-        ef: row[10] || 2.5,
-        memo1: row[11] || '',
-        memo2: row[12] || '',
-        memo3: row[13] || '',
-        memo4: row[14] || '',
-        memo5: row[15] || '',
-        statusListening: row[16] || '未着手',
-        statusReading: row[17] || '未着手',
-        statusSpeaking: row[18] || '未着手',
-        statusWriting: row[19] || '未着手',
-        registeredDate: row[20] || todayStr
+        front: String(row[1] || ''),
+        back: String(row[2] || ''),
+        example: String(row[3] || ''),
+        section: String(row[4] || 'デフォルト'),
+        tags: String(row[5] || ''),
+        readPattern: String(row[6] || 'E1,J1'),
+        readInterval: Number(row[7]) || 1.0,
+        nextReviewDate: String(row[8] || ''),
+        interval: Number(row[9]) || 1,
+        ef: Number(row[10]) || 2.5,
+        memo1: String(row[11] || ''),
+        memo2: String(row[12] || ''),
+        memo3: String(row[13] || ''),
+        memo4: String(row[14] || ''),
+        memo5: String(row[15] || ''),
+        statusListening: String(row[16] || '未着手'),
+        statusReading: String(row[17] || '未着手'),
+        statusSpeaking: String(row[18] || '未着手'),
+        statusWriting: String(row[19] || '未着手'),
+        registeredDate: registeredDate
       };
       
       console.log(`変換後オブジェクト: ID=${word.id}, front="${word.front}", back="${word.back}"`);
+      
+      // JSON化テスト
+      try {
+        const testJson = JSON.stringify(word);
+        console.log(`単語${index + 1}のJSON化成功: ${testJson.length}文字`);
+      } catch (jsonError) {
+        console.error(`単語${index + 1}のJSON化エラー:`, jsonError);
+        console.error(`問題のあるオブジェクト:`, word);
+      }
+      
       return word;
     });
     
@@ -488,7 +531,29 @@ function getAllWords() {
     console.log(`=== getAllWords関数完了: ${words.length}件返却 ===`);
     console.log('返却前の最終確認 - wordsの型: ' + typeof words);
     console.log('返却前の最終確認 - words.length: ' + words.length);
-    console.log('返却前の最終確認 - JSON化テスト: ' + JSON.stringify(words).substring(0, 200) + '...');
+    
+    // 安全なJSON化テスト
+    try {
+      const jsonTest = JSON.stringify(words);
+      console.log('返却前の最終確認 - JSON化成功: ' + jsonTest.length + '文字');
+      console.log('返却前の最終確認 - JSON化サンプル: ' + jsonTest.substring(0, 200) + '...');
+    } catch (jsonError) {
+      console.error('返却前のJSON化エラー:', jsonError);
+      console.error('JSON化できないデータが含まれています');
+      
+      // 各単語を個別にチェック
+      words.forEach((word, index) => {
+        try {
+          JSON.stringify(word);
+        } catch (individualError) {
+          console.error(`単語${index + 1}でJSON化エラー:`, individualError);
+          console.error('問題のある単語:', word);
+        }
+      });
+      
+      // エラー時は空配列を返す
+      return [];
+    }
     
     return words;
     
@@ -496,8 +561,14 @@ function getAllWords() {
     console.error('=== getAllWords関数でエラー発生 ===');
     console.error('エラー詳細: ' + error.toString());
     console.error('エラースタック: ' + (error.stack || '取得できません'));
+    console.error('エラーが発生した行: ' + (error.lineNumber || '不明'));
+    
+    // エラーをクライアント側でも確認できるよう、詳細情報を保存
+    console.error('スプレッドシートID: ' + SPREADSHEET_ID);
+    console.error('シート名: ' + SHEET_NAME);
     
     // エラー時は空配列を返す
+    console.log('エラーのため空配列を返却します');
     return [];
   }
 }
